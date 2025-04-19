@@ -19,7 +19,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Sticker Smash', // Título exibido no header (topo)
+          tabBarLabel: 'Home',     // Texto do ícone na tab bar
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'home-sharp' : 'home-outline'}
@@ -32,7 +33,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="about"
         options={{
-          title: 'About',
+          title: 'Sobre', // Título exibido no header (topo)
+          tabBarLabel: 'About',     // Texto do ícone na tab bar
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'information-circle' : 'information-circle-outline'}

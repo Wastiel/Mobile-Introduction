@@ -2337,3 +2337,623 @@ O nosso projeto até aqui:
 
 ## 6 Realizando uma captura de Tela
 
+Neste capitulo vamos aprender a capturar uma tela, usando uma biblioteca de terceiros, [react-native-view-shot](https://github.com/gre/react-native-view-shot) .
+
+
+### 1 Instalar Bibliotecas
+
+Para instalar react-native-view-shote expo-media-libraryexecutar os seguintes comandos:
+
+```sh
+npx expo install react-native-view-shot expo-media-library
+```
+
+### 2 Solicitar permissões
+
+Um app requer informacões como acessar biblioca de midia, permissões e etc.. 
+Usando o hook usePermissions() da biblioteca expo-media-library, podemos usar a permissão o método status e requestPermission() para solicitar acesso.
+Quando o aplicativo é carregado pela primeira vez e o status da permissão não é concedido nem negado, o valor de status é null. Quando solicitada a permissão, o usuário pode concedê-la ou negá-la. Podemos adicionar uma condição para verificar se é null e, em caso afirmativo, acionar o método requestPermission(). Após obter o acesso, o valor de statusmuda para granted.
+
+vamos ajustar o seguinte arquivo: aplicativo/(guias)/index.tsx
+Observação ao final da sessão, teremos o index completo, caso você nao entenda o que tem que ajsutar. 
+
+```tsx
+import * as MediaLibrary from 'expo-media-library';
+
+// ...rest of the code remains same
+
+export default function Index() {
+  const [status, requestPermission] = MediaLibrary.usePermissions();
+  // ...rest of the code remains same
+
+  if (status === null) {
+    requestPermission();
+  }
+
+  // ...rest of the code remains same
+}
+```
+
+### 3 Criar uma referência para salvar a visualização atual
+
+Usaremos react-native-view-shot para permitir que o usuário faça uma captura de tela dentro do aplicativo. E
+
+- Importar captureRefde react-native-view-shot e useRef para React.
+- Crie uma variável de referência imageRef para armazenar a referência da imagem capturada.
+- Envolva os componentes <ImageViewer> e dentro de a e então passe a variável de referência para ele.<EmojiSticker><View>
+
+Lembrando, que o completo do index vai estar no final da sessão. 
+
+```tsx
+import { useState, useRef } from 'react';
+import { captureRef } from 'react-native-view-shot';
+
+export default function Index() {
+   const imageRef = useRef<View>(null);
+
+  // ...rest of the code remains same
+
+  return (
+    <GestureHandlerRootView style={styles.container}>
+      <View style={styles.imageContainer}>
+        <View ref={imageRef} collapsable={false}>
+          <ImageViewer imgSource={PlaceholderImage} selectedImage={selectedImage} />
+          {pickedEmoji && <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />}
+        </View>
+      </View>
+      {/* ...rest of the code remains same */}
+    </GestureHandlerRootView>
+  );
+}
+```
+
+No snippet acima, o atributo collapsable está definido como false. Isso permite que o <View> componente capture apenas a imagem de fundo e o adesivo emoji.
+
+### 4 capturando a tela e salvando
+
+Podemos caputar a tela com o comando captureRef(), que é um mmetodo do react-native-view-shotdentro da função onSaveImageAsync().
+
+Dentro de app/(tabs)/index.tsx , atualizamos a função onSaveImageAsync() com o seguinte código:
+
+```tsx
+import { View, StyleSheet } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { useState, useRef } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as MediaLibrary from 'expo-media-library';
+import { captureRef } from 'react-native-view-shot';
+import { type ImageSource } from 'expo-image';
+
+import Button from '@/components/Button';
+import ImageViewer from '@/components/ImageViewer';
+import IconButton from '@/components/IconButton';
+import CircleButton from '@/components/CircleButton';
+import EmojiPicker from '@/components/EmojiPicker';
+import EmojiList from '@/components/EmojiList';
+import EmojiSticker from '@/components/EmojiSticker';
+
+const PlaceholderImage = require('@/assets/images/background-image.png');
+
+export default function Index() {
+  const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined);
+  const [showAppOptions, setShowAppOptions] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [pickedEmoji, setPickedEmoji] = useState<ImageSource | undefined>(undefined);
+  const [status, requestPermission] = MediaLibrary.usePermissions();
+  const imageRef = useRef<View>(null);
+
+  if (status === null) {
+    requestPermission();
+  }
+
+  const pickImageAsync = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setSelectedImage(result.assets[0].uri);
+      setShowAppOptions(true);
+    } else {
+      alert('You did not select any image.');
+    }
+  };
+
+  const onReset = () => {
+    setShowAppOptions(false);
+  };
+
+  const onAddSticker = () => {
+    setIsModalVisible(true);
+  };
+
+  const onModalClose = () => {
+    setIsModalVisible(false);
+  };
+
+  const onSaveImageAsync = async () => {
+    try {
+      const localUri = await captureRef(imageRef, {
+        height: 440,
+        quality: 1,
+      });
+
+      await MediaLibrary.saveToLibraryAsync(localUri);
+      if (localUri) {
+        alert('Saved!');
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  return (
+    <GestureHandlerRootView style={styles.container}>
+      <View style={styles.imageContainer}>
+        <View ref={imageRef} collapsable={false}>
+          <ImageViewer imgSource={PlaceholderImage} selectedImage={selectedImage} />
+          {pickedEmoji && <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />}
+        </View>
+      </View>
+      {showAppOptions ? (
+        <View style={styles.optionsContainer}>
+          <View style={styles.optionsRow}>
+            <IconButton icon="refresh" label="Reset" onPress={onReset} />
+            <CircleButton onPress={onAddSticker} />
+            <IconButton icon="save-alt" label="Save" onPress={onSaveImageAsync} />
+          </View>
+        </View>
+      ) : (
+        <View style={styles.footerContainer}>
+          <Button theme="primary" label="Choose a photo" onPress={pickImageAsync} />
+          <Button label="Use this photo" onPress={() => setShowAppOptions(true)} />
+        </View>
+      )}
+      <EmojiPicker isVisible={isModalVisible} onClose={onModalClose}>
+        <EmojiList onSelect={setPickedEmoji} onCloseModal={onModalClose} />
+      </EmojiPicker>
+    </GestureHandlerRootView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#25292e',
+    alignItems: 'center',
+  },
+  imageContainer: {
+    flex: 1,
+  },
+  footerContainer: {
+    flex: 1 / 3,
+    alignItems: 'center',
+  },
+  optionsContainer: {
+    position: 'absolute',
+    bottom: 80,
+  },
+  optionsRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+});
+
+```
+
+Agora, vamos escolher uma foto e adicionar um adesivo a mesma. Em seguida, vamos  "Salvar". O resultado deve ser o seguinte:
+
+<img src="assets/salvando_galeria.gif" alt="Estrutura" width="300" />
+
+Imagem da galeria
+<img src="assets/imagem_galerai.jpeg" alt="Estrutura" width="300" />
+
+## 7 Lidar com diferenças de plataforma
+
+Android, iOS e a web têm recursos diferentes. No nosso caso, tanto o Android quanto o iOS conseguem capturar uma captura de tela com a react-native-view-shotbiblioteca. No entanto, navegadores da web não conseguem.
+
+Neste caso vamos aprender a lidar com capturas de tela para navegadores web no nosso app
+
+### 1 Instalar e importar dom to image
+
+Para capturar uma captura de tela na web e salvá-la como imagem, usaremos uma biblioteca de terceiros chamada [dom-to-image](https://github.com/tsayen/dom-to-image#readme).
+
+A caputra de tela é transformada em uma imagem SVG ou PNG/JPEG
+
+Executamos o seguinte comando para instalar a biblioteca: 
+
+```sh
+npm install dom-to-image
+```
+
+### 2 Adicionar Código platform-specific
+
+Usando o módulo plataform do react, podemos implementar o comportamento especifico dentro da plataforma.  
+
+- Importar o  módulo de  Platform do react-native.
+- Importar a biblioteca domtoimage do dom-to-image.
+- Atualize a função onSaveImageAsync() para verificar se a plataforma atual está 'web'com a propriedade Platform.OS. Se estiver 'web', usaremos o método domtoimage.toJpeg() para converter e capturar a <View> imagem atual como JPEG. Caso contrário, continuaremos usando a mesma lógica adicionada para plataformas nativas.
+
+```tsx
+import { View, StyleSheet, Platform } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { useState, useRef } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as MediaLibrary from 'expo-media-library';
+import { type ImageSource } from 'expo-image';
+import { captureRef } from 'react-native-view-shot';
+import domtoimage from 'dom-to-image';
+
+import Button from '@/components/Button';
+import ImageViewer from '@/components/ImageViewer';
+import IconButton from '@/components/IconButton';
+import CircleButton from '@/components/CircleButton';
+import EmojiPicker from '@/components/EmojiPicker';
+import EmojiList from '@/components/EmojiList';
+import EmojiSticker from '@/components/EmojiSticker';
+
+const PlaceholderImage = require('@/assets/images/background-image.png');
+
+export default function Index() {
+  const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined);
+  const [showAppOptions, setShowAppOptions] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [pickedEmoji, setPickedEmoji] = useState<ImageSource | undefined>(undefined);
+  const [status, requestPermission] = MediaLibrary.usePermissions();
+  const imageRef = useRef<View>(null);
+
+  if (status === null) {
+    requestPermission();
+  }
+
+  const pickImageAsync = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setSelectedImage(result.assets[0].uri);
+      setShowAppOptions(true);
+    } else {
+      alert('You did not select any image.');
+    }
+  };
+
+  const onReset = () => {
+    setShowAppOptions(false);
+  };
+
+  const onAddSticker = () => {
+    setIsModalVisible(true);
+  };
+
+  const onModalClose = () => {
+    setIsModalVisible(false);
+  };
+
+  const onSaveImageAsync = async () => {
+    if (Platform.OS !== 'web') {
+      try {
+        const localUri = await captureRef(imageRef, {
+          height: 440,
+          quality: 1,
+        });
+
+        await MediaLibrary.saveToLibraryAsync(localUri);
+        if (localUri) {
+          alert('Saved!');
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    } else {
+      try {
+        const dataUrl = await domtoimage.toJpeg(imageRef.current, {
+          quality: 0.95,
+          width: 320,
+          height: 440,
+        });
+
+        let link = document.createElement('a');
+        link.download = 'sticker-smash.jpeg';
+        link.href = dataUrl;
+        link.click();
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  };
+
+  return (
+    <GestureHandlerRootView style={styles.container}>
+      <View style={styles.imageContainer}>
+        <View ref={imageRef} collapsable={false}>
+          <ImageViewer imgSource={PlaceholderImage} selectedImage={selectedImage} />
+          {pickedEmoji && <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />}
+        </View>
+      </View>
+      {showAppOptions ? (
+        <View style={styles.optionsContainer}>
+          <View style={styles.optionsRow}>
+            <IconButton icon="refresh" label="Reset" onPress={onReset} />
+            <CircleButton onPress={onAddSticker} />
+            <IconButton icon="save-alt" label="Save" onPress={onSaveImageAsync} />
+          </View>
+        </View>
+      ) : (
+        <View style={styles.footerContainer}>
+          <Button theme="primary" label="Choose a photo" onPress={pickImageAsync} />
+          <Button label="Use this photo" onPress={() => setShowAppOptions(true)} />
+        </View>
+      )}
+      <EmojiPicker isVisible={isModalVisible} onClose={onModalClose}>
+        <EmojiList onSelect={setPickedEmoji} onCloseModal={onModalClose} />
+      </EmojiPicker>
+    </GestureHandlerRootView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#25292e',
+    alignItems: 'center',
+  },
+  imageContainer: {
+    flex: 1,
+  },
+  footerContainer: {
+    flex: 1 / 3,
+    alignItems: 'center',
+  },
+  optionsContainer: {
+    position: 'absolute',
+    bottom: 80,
+  },
+  optionsRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+});
+```
+
+Observação: para corrigir o erro que vai ocorrer, devemos adicionar uma definição de tipo após importar a bibliiteca. Para isto criamos um arquivo chamdo types.d.ts na raiz do nosso projeto StickerSmash/tipos.d.ts e adicionamos o código abaixo:
+
+```tsx
+declare module 'dom-to-image';
+```
+
+No final ao testarmos o nosso projeto, temos o seguinte resultado: 
+
+
+<img src="assets/gravando_pc.gif" alt="Estrutura" width="300" />
+
+
+## 8 Configurar a barra de status
+
+Vamos configurar uma barra de estatuse personalização do aplicativo da tela inicial. 
+
+### 1 Configurar a barra de status
+
+Para realizar o processo de configuração, vamos usar uma biblioteca que ja vem pré-instalada em todos os projetos a [create-expo-app](https://docs.expo.dev/versions/latest/sdk/status-bar/). esta biblioteca fornece um StatusBar para configurar um estilo de barra
+
+Dentro do app/layout.tsx (Lembrem que este é o layout fora da nossa (tabs)):
+
+- Importar StatusBarde expo-status-bar.
+- Agrupar os componentes StatusBarexistentes Stackcom o componente Fragment do React.
+
+```tsx
+import { Stack } from 'expo-router';
+
+import { StatusBar } from 'expo-status-bar';
+
+
+export default function RootLayout() {
+  return (
+    <>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="+not-found" />
+      </Stack>
+      <StatusBar style="light" />
+    </>
+  );
+}
+```
+
+### 2 Icone do Aplicativo
+
+Dentro do projeto, há um arquivo icon.png dentro do diretório assets/images . Este é o ícone do nosso app. É uma imagem de 1024px por 1024px e tem a seguinte aparência:
+
+<img src="assets/icon .png" alt="Estrutura" width="200" />
+
+Assim como a imagem da tela inicial, a propriedade "icon" no arquivo app.json configura o caminho do ícone do aplicativo. Por padrão, um novo projeto Expo define o caminho correto para "./assets/images/icon.png". Não precisamos alterar nada ou caso queiramos colocar um icone nosso, é so alterar este caminho. 
+
+
+### 3 Tela Inicial
+
+Uma tela inicial fica visivel antes do contéudo do aplicativo ser carregado.
+
+Ela fica dentro do nosso arquivo de configuração app.json
+
+```json
+{
+  "plugins": [
+    [
+      "expo-splash-screen",
+      {
+        "image": "./assets/images/splash-icon.png"
+      }
+    ]
+  ]
+}
+```
+
+Para testarmos a tela inicial, nao podemos usar o expo Go. E para isso no proximo capitulo vamos buildar o noss app de testes e instalar no nosso android. 
+
+
+
+## 9 buildando um apk para uso no celular
+
+### 1 Cereja do bolo
+
+Antes de buildarmos nosso APP, vamos realizar alguns ajustes de nomenclatura.
+Primeiramente ajustamos as nomenclaturas da nossa área de trabalho, além de atualizarmos a nossa página sobre.
+
+Primeiramente vamos atualizar o nosso (tabs)/_layouts.tsx, mudando a nomenclatura de topo da página:
+
+```tsx
+
+import { Tabs } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
+
+export default function TabLayout() {
+  return (
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: '#ffd33d',
+        headerStyle: {
+          backgroundColor: '#25292e',
+        },
+        headerShadowVisible: false,
+        headerTintColor: '#fff',
+        tabBarStyle: {
+          backgroundColor: '#25292e',
+        },
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Sticker Smash', // Título exibido no header (topo)
+          tabBarLabel: 'Home',     // Texto do ícone na tab bar
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'home-sharp' : 'home-outline'}
+              color={color}
+              size={24}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="about"
+        options={{
+          title: 'Sobre', // Título exibido no header (topo)
+          tabBarLabel: 'About',     // Texto do ícone na tab bar
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'information-circle' : 'information-circle-outline'}
+              color={color}
+              size={24}
+            />
+          ),
+        }}
+      />
+    </Tabs>
+  );
+}
+```
+
+Posterior ajustamos a nossa página (tabs)/about.tsx
+
+```tsx
+
+import { View, Text, StyleSheet } from 'react-native';
+
+export default function AboutScreen() {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Sobre o App</Text>
+      <Text style={styles.description}>
+        Este é um aplicativo de exemplo criado para demonstrar a navegação com abas utilizando o Expo Router. 
+        Ele inclui telas como Home e Sobre, com ícones personalizados e estilização da interface, acesso ao storage e edição de imagem.
+      </Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#25292e',
+    padding: 24,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ffd33d',
+    marginBottom: 12,
+  },
+  description: {
+    fontSize: 16,
+    color: '#fff',
+    lineHeight: 22,
+  },
+});
+
+```
+
+Agora vejamos uma imagem da versão final do nosso app:
+
+<img src="assets/versao_final.PNG" alt="Estrutura" width="300" />
+
+### 2 Buildando um apk
+
+---
+Antes de continuarmos, devemos criar uma conta na plataforma [EAS](https://expo.dev/signup).
+
+Posterior necessitamos intalar o pacote de build do expo. O comando abaixo instala de forma global
+
+```sh
+npm install -g eas-cli
+```
+
+Logamos na plataforma eas com o seguinte comando
+Colocamos usuário e senha criado nos passos anteriores.
+
+```sh
+eas login
+```
+
+Geramos a configuração do projeto:
+
+```sh
+eas build:configure
+```
+
+Alteramos o arquivo eas.json criado com as seguintes configurações: 
+
+```json
+{
+  "build": {
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      }
+    }
+  }
+}
+```
+
+Posterior buildamos o nosso apk com o seguinte comando: 
+Observação: O processo demora em função de estarmos com uma licença free para build na plataforma EAS.
+
+```sh
+eas build --profile preview --platform android
+```
+
+
+### 3 Instalando o app no celular
+
+Pegamos o arquivo gerado através da URL do build. O mesmo vai entregar um arquivo.apk.
+
+Posterior, enviamos esta arquivo APK para o nosso android via drive ou outra ferramenta de escolha. 
+
+Ao final, instalamos o mesmo em nosso celular. Para a instalação ser possível o android tem que estar em modo desenvolvedor e o apk em diretório local.
+---
