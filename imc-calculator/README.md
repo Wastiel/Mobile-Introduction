@@ -46,7 +46,7 @@ obs: Recomendo que criem uma pasta na raiz do computador conforme modelo abaixo:
 c:\desenvolvimento\mobile\
 
 ```sh
-npx create-expo-app@latest StickerSmash
+npx create-expo-app@latest imc-calculator
 ```
 O comando vai criar um diretório usando um modelo padrão de app, com biblioteca essenciais. 
 
@@ -273,8 +273,6 @@ const styles = StyleSheet.create({
 </details>
 
 ### 5 Repetindo código
-
-
 
 Como queremos dois campos, um para altura e outro para o peso:
 
