@@ -1,4 +1,4 @@
-# Mobile-Introduction
+# Mobile-Introduction - Sticker Smash
 
 # Objetivo: 
 Este repositório tem como objetivo dar uma introdução rápida ao desenvolvimento de um app para dispositivos android com o foco em aplicações mobile. 
@@ -51,7 +51,7 @@ obs: Recomendo que criem uma pasta na raiz do computador conforme modelo abaixo:
 c:\desenvolvimento\mobile\
 
 ```sh
-npx create-expo-app@latest StickerSmash && cd StickerSmash
+npx create-expo-app@latest StickerSmash
 ```
 O comando vai criar um diretório usando um modelo padrão de app, com biblioteca essenciais. 
 
