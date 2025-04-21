@@ -107,7 +107,7 @@ Vamos seguir a seguinte estrutura para o nosso projeto conforme abaixo. Ainda n�
 ```java
 IMCCalculator/
 ├── app/
-│   ├── index.tsx         <- Tela principal (podemos colocar o IMC aqui)
+│   ├── index.tsx         <- Tela principal (Vamos  o TIC-TOC-TAC aqui)
 │   ├── _layout.tsx
 │   └── ...
 ├── components/           <- Lugar ideal para seus componentes reutilizáveis

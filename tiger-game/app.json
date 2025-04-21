@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "tiger-game",
+    "slug": "tiger-game",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/tiger.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/tiger.png",
+        "backgroundColor": "#25292e"
+      },
+      "package": "com.willianwa8.tigergame"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/tiger.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#25292e"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "f9fc8beb-7c45-4ec6-baf5-99200f5cdf93"
+      }
+    }
+  }
+}
