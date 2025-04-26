@@ -98,7 +98,7 @@ Estado da nossa aplicação até o momento:
 
 Vamos criar um curriculo online com o intuito de utilizar alguns componentes do Ract Native, para praticar como atividade
 
-A ideia é no futuro inclusive podermos imprimir em pdf
+A ideia é no futuro voces se desafiarem a transformar o curriculum segmentado por componentes ou até mesmo vocês podendo adicionar as competencias de forma dinamica.
 
 ### 2 Iniciando o desenvolvimento
 
@@ -1284,7 +1284,7 @@ Posterior vamos criar dois arquivos dentro desta pasta com os seguintes nome:
 ```java
 cv-onilne/
 ├── app/
-│   ├── index.tsx         <- Tela principal (Vamos colocar o tiger-game aqui)
+│   ├── index.tsx         <- Tela principal (Vamos colocar o cv-online aqui)
 │   ├── _layout.tsx
 │   └── ...
 ├── component

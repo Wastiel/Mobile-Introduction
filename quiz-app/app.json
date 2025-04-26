@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "quiz-app",
+    "slug": "quiz-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/quiz.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/quiz.png",
+        "backgroundColor": "#007F00"
+      },
+      "package": "com.willianwa8.quizapp"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/quiz.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/quiz.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#007F00"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "4d21f6c0-d858-4bdc-a7b4-628f8bf8fae8"
+      }
+    }
+  }
+}
