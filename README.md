@@ -54,7 +54,7 @@ cd nome-do-projeto
 
 3. Inicie o servidor local com o modo **túnel** (facilita conexão com o celular):
 ```sh
-npx expo start --tunnel
+npx expo start --tunnel --reset-cache
 ```
 
 > 💡 Com o QR code gerado no terminal ou navegador, escaneie com o app **Expo Go** no celular para visualizar o app rodando ao vivo.
