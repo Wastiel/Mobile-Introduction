@@ -2007,9 +2007,8 @@ Ao final temos as seguintes telas no nosso software:
 
 Vamos ajustar a nossa rota para melhorar o descritivo de index na mesma: 
 
-import { Stack } from 'expo-router';
-
 ```tsx
+import { Stack } from 'expo-router';
 export default function Layout() {
   return (
     <Stack>
